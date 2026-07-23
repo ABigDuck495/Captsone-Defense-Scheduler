@@ -15,6 +15,12 @@
         public function __destruct(){
             $this->conn->close();
         }
+        public function select($table,$columns,$where = null){
+            $sql = "SELECT $columns FROM $table";
+            if($where != null) $sql .= " WHERE $where";
+            $this->res = $this->conn->query($sql);
+            return $this->res;
+        }
     }
 
 ?>

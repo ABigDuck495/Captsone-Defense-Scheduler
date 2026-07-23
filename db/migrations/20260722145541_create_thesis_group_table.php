@@ -1,31 +1,28 @@
+
+20260722120300 create thesis groups table · PHP
 <?php
-
+ 
 use Phinx\Migration\AbstractMigration;
-
-final class CreateGroupMembersTable extends AbstractMigration
+ 
+final class CreateThesisGroupsTable extends AbstractMigration
 {
     public function change(): void
     {
-        $table = $this->table('group_members', ['id' => 'group_member_id']);
-
-        $table->addColumn('group_id', 'integer', ['signed' => false])
-              ->addColumn('student_id', 'integer', ['signed' => false])
+        $table = $this->table('thesis_groups', ['id' => 'group_id']);
+ 
+        $table->addColumn('thesis_title', 'string', ['limit' => 255, 'null' => true])
               ->addColumn('status', 'enum', [
-                  'values'  => ['invited', 'accepted', 'declined', 'removed'],
-                  'default' => 'invited',
+                  'values'  => ['forming', 'finalized', 'panel_assigned', 'defense_scheduled', 'completed', 'disbanded'],
+                  'default' => 'forming',
               ])
-              ->addColumn('is_leader', 'boolean', ['default' => false])
-              ->addColumn('invited_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addColumn('responded_at', 'timestamp', ['null' => true])
-              ->addForeignKey('group_id', 'thesis_groups', 'group_id', [
-                  'delete' => 'CASCADE',
-                  'update' => 'NO_ACTION',
-              ])
-              ->addForeignKey('student_id', 'students', 'student_id', [
+              ->addColumn('created_by', 'integer', ['signed' => false])
+              ->addColumn('created_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
+              ->addColumn('finalized_at', 'timestamp', ['null' => true])
+              ->addForeignKey('created_by', 'users', 'user_id', [
                   'delete' => 'RESTRICT',
                   'update' => 'NO_ACTION',
               ])
-              ->addIndex(['group_id', 'student_id'], ['unique' => true])
               ->create();
     }
 }
+ 

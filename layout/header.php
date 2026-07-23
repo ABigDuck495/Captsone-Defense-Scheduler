@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    
-<?php if(!auth()){
-    header('Location: auth/login.php');
-} ?>
+    <?php   
+        require __DIR__ . '../db/database.php'; 
+        $db = new Database();
+    ?>

@@ -1,29 +1,26 @@
-
-20260722120400 create group members table · PHP
 <?php
- 
+
 use Phinx\Migration\AbstractMigration;
- 
-final class CreateGroupMembersTable extends AbstractMigration
+
+final class CreateGroupPanelTable extends AbstractMigration
 {
     public function change(): void
     {
-        $table = $this->table('group_members', ['id' => 'group_member_id']);
- 
+        $table = $this->table('group_panel', ['id' => 'panel_id']);
+
         $table->addColumn('group_id', 'integer', ['signed' => false])
-              ->addColumn('student_id', 'integer', ['signed' => false])
-              ->addColumn('is_leader', 'boolean', ['default' => false])
+              ->addColumn('professor_id', 'integer', ['signed' => false])
+              ->addColumn('role', 'enum', ['values' => ['adviser', 'chair', 'critic']])
               ->addColumn('added_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
               ->addForeignKey('group_id', 'thesis_groups', 'group_id', [
                   'delete' => 'CASCADE',
                   'update' => 'NO_ACTION',
               ])
-              ->addForeignKey('student_id', 'users', 'user_id', [
+              ->addForeignKey('professor_id', 'users', 'user_id', [
                   'delete' => 'RESTRICT',
                   'update' => 'NO_ACTION',
               ])
-              ->addIndex(['student_id'], ['unique' => true])
+              ->addIndex(['group_id', 'professor_id', 'role'], ['unique' => true])
               ->create();
     }
 }
- 

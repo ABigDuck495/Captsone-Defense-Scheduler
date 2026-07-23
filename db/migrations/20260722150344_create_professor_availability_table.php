@@ -1,13 +1,15 @@
+
+20260722120600 create professor availability table · PHP
 <?php
-
+ 
 use Phinx\Migration\AbstractMigration;
-
+ 
 final class CreateProfessorAvailabilityTable extends AbstractMigration
 {
     public function change(): void
     {
         $table = $this->table('professor_availability', ['id' => 'availability_id']);
-
+ 
         $table->addColumn('professor_id', 'integer', ['signed' => false])
               ->addColumn('available_date', 'date')
               ->addColumn('start_time', 'time')
@@ -17,7 +19,7 @@ final class CreateProfessorAvailabilityTable extends AbstractMigration
                   'default' => 'available',
               ])
               ->addColumn('created_at', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addForeignKey('professor_id', 'professors', 'professor_id', [
+              ->addForeignKey('professor_id', 'users', 'user_id', [
                   'delete' => 'CASCADE',
                   'update' => 'NO_ACTION',
               ])
@@ -26,3 +28,4 @@ final class CreateProfessorAvailabilityTable extends AbstractMigration
               ->create();
     }
 }
+ 

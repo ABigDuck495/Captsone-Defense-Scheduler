@@ -23,7 +23,7 @@ final class CreateScheduleRequestsTable extends AbstractMigration
                   'delete' => 'CASCADE',
                   'update' => 'NO_ACTION',
               ])
-              ->addForeignKey('requested_by', 'students', 'student_id', [
+              ->addForeignKey('requested_by', 'users', 'user_id', [
                   'delete' => 'RESTRICT',
                   'update' => 'NO_ACTION',
               ])
