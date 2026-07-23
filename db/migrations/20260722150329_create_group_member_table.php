@@ -1,10 +1,8 @@
-
-20260722120400 create group members table · PHP
 <?php
- 
+
 use Phinx\Migration\AbstractMigration;
  
-final class CreateGroupMembersTable extends AbstractMigration
+final class CreateGroupMemberTable extends AbstractMigration
 {
     public function change(): void
     {

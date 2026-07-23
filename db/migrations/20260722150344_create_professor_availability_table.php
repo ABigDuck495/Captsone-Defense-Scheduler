@@ -1,7 +1,5 @@
-
-20260722120600 create professor availability table · PHP
 <?php
- 
+
 use Phinx\Migration\AbstractMigration;
  
 final class CreateProfessorAvailabilityTable extends AbstractMigration

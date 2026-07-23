@@ -1,7 +1,5 @@
-
-20260722120900 create defense schedules table · PHP
 <?php
- 
+
 use Phinx\Migration\AbstractMigration;
  
 final class CreateDefenseSchedulesTable extends AbstractMigration

@@ -1,10 +1,8 @@
-
-20260722120300 create thesis groups table · PHP
 <?php
- 
+
 use Phinx\Migration\AbstractMigration;
  
-final class CreateThesisGroupsTable extends AbstractMigration
+final class CreateThesisGroupTable extends AbstractMigration
 {
     public function change(): void
     {

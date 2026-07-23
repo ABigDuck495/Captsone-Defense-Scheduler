@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-final class CreateScheduleApprovalsTable extends AbstractMigration
+final class CreateScheduleApprovalTable extends AbstractMigration
 {
     public function change(): void
     {
