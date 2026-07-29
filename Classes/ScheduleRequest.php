@@ -1,7 +1,7 @@
 
 <?php
 require_once 'Model.php';
-use Model;
+// use Model;
 class ScheduleRequest extends Model
 {
     protected string $table = 'schedule_requests';

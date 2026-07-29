@@ -10,19 +10,19 @@ class UserSeeder extends AbstractSeed
         $users = $this->table('users');
         $users->truncate(); // optional: clear existing data
 
-        $passwordHash = password_hash('password', PASSWORD_BCRYPT);
+        $passwordHash = password_hash('Pass123', PASSWORD_BCRYPT);
 
         // 6 Students (IDs 1–6)
         $students = [
             [
                 'user_id'        => 1,
-                'email'          => 'student1@clsu2.edu.ph',
+                'email'          => 'mikkimartin.agapito@clsu2.edu.ph',
                 'password_hash'  => $passwordHash,
-                'full_name'      => 'Student One',
+                'full_name'      => 'Mikki Martin Agapito',
                 'role'           => 'student',
                 'department'     => 'Cen',
                 'title'          => null,
-                'student_number' => 'S001',
+                'student_number' => '23-2634',
                 'program'        => 'BSIT',
                 'year_level'     => 'Graduating',
                 'created_at'     => date('Y-m-d H:i:s'),
@@ -30,13 +30,13 @@ class UserSeeder extends AbstractSeed
             ],
             [
                 'user_id'        => 2,
-                'email'          => 'student2@clsu2.edu.ph',
+                'email'          => 'janusgabriel.ramos@clsu2.edu.ph',
                 'password_hash'  => $passwordHash,
-                'full_name'      => 'Student Two',
+                'full_name'      => 'Janus Gabriel Ramos',
                 'role'           => 'student',
                 'department'     => 'Cen',
                 'title'          => null,
-                'student_number' => 'S002',
+                'student_number' => '23-2625',
                 'program'        => 'BSIT',
                 'year_level'     => 'Graduating',
                 'created_at'     => date('Y-m-d H:i:s'),

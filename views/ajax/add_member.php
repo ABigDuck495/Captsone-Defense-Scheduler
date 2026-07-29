@@ -4,7 +4,8 @@ use GroupMember;
 use User;
 
 require_once __DIR__ . '/../../db/bootstrap.php';
-$dbConnection = $pdo ?? $db ?? null;
+require_once __DIR__ . '/../../Classes/User.php';
+$dbConnection = $db ?? $pdo ?? $conn ?? null;
 header('Content-Type: application/json');
  
 if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'student') {

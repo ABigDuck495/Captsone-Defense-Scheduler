@@ -1,6 +1,6 @@
 <?php
 require_once 'Model.php';
-use Model;
+// use Model;
 class ThesisGroup extends Model
 {
     protected string $table = 'thesis_groups';

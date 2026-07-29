@@ -1,6 +1,6 @@
 <?php
 
-    if(session_status() === PHP_SESSION_NONE) {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
     }
     if(!isset($_SESSION['user_id'])) {

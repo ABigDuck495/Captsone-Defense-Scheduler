@@ -1,8 +1,8 @@
 <?php
 
-require_once 'Model.php';
-// use Model;
-class User extends Model{
+require_once __DIR__ . '/Model.php';
+
+class User extends \Model {
     protected string $table = 'users';
     protected string $primaryKey = 'user_id';
 

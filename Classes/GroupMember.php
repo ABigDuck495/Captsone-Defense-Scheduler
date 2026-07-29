@@ -1,6 +1,6 @@
 <?php
  require_once 'Model.php';
-use Model;
+// use Model;
 class GroupMember extends Model
 {
     protected string $table = 'group_members';
