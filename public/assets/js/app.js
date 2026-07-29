@@ -130,28 +130,39 @@
 
     $('#login-form').on('submit', function (e) {
       e.preventDefault();
-      var username = $('#username').val().trim();
+      var email = $('#email').val().trim();
       var password = $('#password').val();
       var $btn = $('#login-btn');
 
       $btn.prop('disabled', true).text('Logging in...');
 
-      // Backend: POST login { username, password } → store session, redirect by role
-      setTimeout(function () {
-        var user = MOCK.users.filter(function (u) {
-          return u.username === username && u.password === password;
-        })[0];
-
+      $.ajax({
+        url: '../../public/ajax/login.php',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ email: email, password: password }),
+        dataType: 'json'
+      }).done(function (response) {
         $btn.prop('disabled', false).text('Log in');
 
-        if (!user) {
-          showAlert('Invalid username or password.', 'danger');
+        if (!response.success) {
+          showAlert(response.message || 'Invalid credentials.', 'danger');
           return;
         }
 
-        sessionStorage.setItem('tss_user', JSON.stringify(user));
-        window.location.href = user.redirect;
-      }, 300);
+        sessionStorage.setItem('tss_user', JSON.stringify({
+          role: response.role,
+          email: email
+        }));
+        window.location.href = response.redirect || (response.role === 'professor' ? '../dashboard/professor.php' : '../dashboard/student.php');
+      }).fail(function (xhr) {
+        $btn.prop('disabled', false).text('Log in');
+        var message = 'Invalid credentials.';
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          message = xhr.responseJSON.message;
+        }
+        showAlert(message, 'danger');
+      });
     });
   }
 

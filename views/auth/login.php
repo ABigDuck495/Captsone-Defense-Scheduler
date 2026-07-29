@@ -7,14 +7,14 @@
     <div class="text-center mb-4">
       <span class="brand-mark brand-mark-lg mb-3">TSS</span>
       <h1 class="h4 mb-1">Log in to Thesis Scheduler System</h1>
-      <p class="text-body-secondary small mb-0">Students, use your group account. Advisers, use your faculty credentials.</p>
+      <p class="text-body-secondary small mb-0">Students, use your email. Advisers, use your email.</p>
     </div>
 
     <div id="form-alert"></div>
 
     <form id="login-form" class="text-center" novalidate>
       <div class="mb-3">
-        <input type="text" class="form-control text-center" id="username" name="username" placeholder="Username" autocomplete="username" required>
+        <input type="text" class="form-control text-center" id="email" name="email" placeholder="Email" autocomplete="email" required>
       </div>
       <div class="mb-3">
         <input type="password" class="form-control text-center" id="password" name="password" placeholder="Password" autocomplete="current-password" required>

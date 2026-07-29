@@ -30,6 +30,7 @@ return
             'host' => 'localhost',
             'name' => 'thesis_defense_scheduler',
             'user' => 'root',
+            'pass' => '727727',
             'port' => '3306',
             'charset' => 'utf8',
         ]
