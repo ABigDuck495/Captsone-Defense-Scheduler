@@ -11,7 +11,7 @@
       <h1 class="mb-0">Thesis Scheduling System</h1>
       <span class="badge bg-forest">Professor</span>
     </div>
-    <a href="../auth/logout.php" class="btn btn-sm btn-outline-light" style="color:#fff;border-color:rgba(255,255,255,.5);">Log out</a>
+    <a href="<?= $__tssBaseUrl ?>auth/logout.php" class="btn btn-sm btn-outline-light" style="color:#fff;border-color:rgba(255,255,255,.5);">Log out</a>
   </div>
 </header>
 
@@ -59,7 +59,7 @@
 
 <footer class="tt-footer" id="site-footer"></footer>
 
-<script src="../../public/vendor/jquery/jquery.min.js"></script>
-<script src="../../public/assets/js/app.js"></script>
+<script src="<?= $__tssBaseUrl ?>public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= $__tssBaseUrl ?>public/assets/js/app.js"></script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

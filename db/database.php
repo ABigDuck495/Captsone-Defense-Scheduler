@@ -1,7 +1,7 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "Capstone_Defense_Scheduler";
+    private $db_name = "Thesis_Defense_Scheduler";
     private $username = "root";
     private $password = "727727";
     private $conn;

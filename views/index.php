@@ -1,12 +1,12 @@
-<?php require __DIR__ . '/../views/layout/header.php' ?>
+<?php require __DIR__ . '/layout/header.php'; ?>
 
-<link rel="stylesheet" href="vendor/bootstrap-5.3.3-dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="assets/css/custom.css">
+<link rel="stylesheet" href="<?= $__tssBaseUrl ?>public/assets/vendor/bootstrap-5.3.3-dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="<?= $__tssBaseUrl ?>public/assets/css/custom.css">
 
 <header id="site-header" class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-5">
   <div class="container-fluid">
     <span class="navbar-brand mb-0 h1">Thesis Scheduling System</span>
-    <a class="btn btn-primary" href="/auth/login.php">Log in</a>
+    <a class="btn btn-primary" href="<?= $__tssBaseUrl ?>auth/login.php">Log in</a>
   </div>
 </header>
 
@@ -66,4 +66,4 @@
 
 <footer class="tt-footer" id="site-footer"></footer>
 
-<?php require __DIR__ . '/../views/layout/footer.php' ?>
+<?php require __DIR__ . '/layout/footer.php'; ?>

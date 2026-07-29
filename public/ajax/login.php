@@ -23,9 +23,20 @@ if (!$user || !password_verify($password, $user['password_hash'])) {
 $_SESSION['user_id'] = $user['user_id'];
 $_SESSION['role']    = $user['role'];
 
+$basePath = '/';
+if (isset($_SERVER['REQUEST_URI'])) {
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+    $segments = array_values(array_filter(explode('/', trim($requestPath, '/')), 'strlen'));
+    foreach ($segments as $segment) {
+        if (in_array($segment, ['auth', 'dashboard', 'views', 'public'], true)) {
+            break;
+        }
+        $basePath = '/' . $segment . '/';
+    }
+}
 $redirect = $user['role'] === 'professor'
-    ? '../dashboard/professor.php'
-    : '../dashboard/student.php';
+    ? $basePath . 'dashboard/professor.php'
+    : $basePath . 'dashboard/student.php';
 
 echo json_encode([
     'success' => true,

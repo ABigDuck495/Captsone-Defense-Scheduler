@@ -1,6 +1,12 @@
 (function () {
   'use strict';
 
+  var TSS_BASE_URL = (window.TSS_BASE_URL || '/').replace(/\/+$/, '') + '/';
+
+  function tssUrl(path) {
+    return TSS_BASE_URL + String(path).replace(/^\//, '');
+  }
+
   // Mock data — replace with AJAX calls to backend
   var today = new Date();
 
@@ -11,11 +17,11 @@
     currentUser: null,
 
     users: [
-      { username: 'prof1',    password: 'password', role: 'professor', id: 1, name: 'Dr. Alice Cruz',   redirect: '../dashboard/professor.php' },
-      { username: 'prof2',    password: 'password', role: 'professor', id: 2, name: 'Dr. Ben Santos',    redirect: '../dashboard/professor.php' },
-      { username: 'prof3',    password: 'password', role: 'professor', id: 3, name: 'Dr. Carla Reyes',   redirect: '../dashboard/professor.php' },
-      { username: 'prof4',    password: 'password', role: 'professor', id: 4, name: 'Dr. Diego Torres',  redirect: '../dashboard/professor.php' },
-      { username: 'student1', password: 'password', role: 'student',   id: 101, name: 'Group: Neural Nets Thesis', redirect: '../dashboard/student.php' }
+      { username: 'prof1',    password: 'password', role: 'professor', id: 1, name: 'Dr. Alice Cruz',   redirect: tssUrl('dashboard/professor.php') },
+      { username: 'prof2',    password: 'password', role: 'professor', id: 2, name: 'Dr. Ben Santos',    redirect: tssUrl('dashboard/professor.php') },
+      { username: 'prof3',    password: 'password', role: 'professor', id: 3, name: 'Dr. Carla Reyes',   redirect: tssUrl('dashboard/professor.php') },
+      { username: 'prof4',    password: 'password', role: 'professor', id: 4, name: 'Dr. Diego Torres',  redirect: tssUrl('dashboard/professor.php') },
+      { username: 'student1', password: 'password', role: 'student',   id: 101, name: 'Group: Neural Nets Thesis', redirect: tssUrl('dashboard/student.php') }
     ],
 
     professors: [
@@ -137,7 +143,7 @@
       $btn.prop('disabled', true).text('Logging in...');
 
       $.ajax({
-        url: '../../public/ajax/login.php',
+        url: tssUrl('views/ajax/login.php'),
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ email: email, password: password }),
@@ -154,7 +160,7 @@
           role: response.role,
           email: email
         }));
-        window.location.href = response.redirect || (response.role === 'professor' ? '../dashboard/professor.php' : '../dashboard/student.php');
+        window.location.href = response.redirect || (response.role === 'professor' ? tssUrl('dashboard/professor.php') : tssUrl('dashboard/student.php'));
       }).fail(function (xhr) {
         $btn.prop('disabled', false).text('Log in');
         var message = 'Invalid credentials.';
