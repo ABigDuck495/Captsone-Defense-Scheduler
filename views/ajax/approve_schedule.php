@@ -1,8 +1,5 @@
 <?php
 
-use DefenseSchedule;
-use ScheduleApproval;
-use ScheduleRequest;
 
 require_once __DIR__ . '/../../db/bootstrap.php';
 header('Content-Type: application/json');

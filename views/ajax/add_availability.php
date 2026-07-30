@@ -1,7 +1,5 @@
-
 <?php
-require_once '__DIR__' . '../../Classes/ProfessorAvailability.php';
-use ProfessorAvailability;
+require_once __DIR__ . '/../../Classes/ProfessorAvailability.php';
 require_once __DIR__ . '/../../db/bootstrap.php';
 header('Content-Type: application/json');
  
@@ -22,4 +20,3 @@ $data = json_decode(file_get_contents('php://input'), true) ?? [];
 ]);
  
 echo json_encode(['success' => true]);
- 

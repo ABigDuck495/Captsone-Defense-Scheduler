@@ -1,6 +1,5 @@
 <?php
 
-use ThesisGroup;
 
 require_once __DIR__ . '/../../db/bootstrap.php';
 header('Content-Type: application/json');

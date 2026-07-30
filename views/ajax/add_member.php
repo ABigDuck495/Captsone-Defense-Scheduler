@@ -1,7 +1,5 @@
 <?php
 
-use GroupMember;
-use User;
 
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/User.php';
@@ -34,4 +32,3 @@ if (!$student || $student['role'] !== 'student') {
 ]);
  
 echo json_encode(['success' => true]);
- 

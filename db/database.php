@@ -3,7 +3,7 @@ class Database {
     private $host = "localhost";
     private $db_name = "Thesis_Defense_Scheduler";
     private $username = "root";
-    private $password = "727727";
+    private $password = "qwerty";
     private $conn;
     public $res;
 

@@ -1,8 +1,8 @@
 <?php
 
-use ProfessorAvailability;
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/ProfessorAvailability.php';
+require_once __DIR__ . '/../../Classes/GroupPanel.php';
 header('Content-Type: application/json');
 
 $groupId = (int)($_GET['group_id'] ?? 0);
@@ -16,4 +16,7 @@ if (!$groupId) {
 
 $avail = new ProfessorAvailability();
 $slots = $avail->findOverlapsForGroupInMonth($groupId, $year, $month);
-echo json_encode(['success' => true, 'slots' => $slots]);
+
+$panel = (new GroupPanel())->panelWithNames($groupId);
+
+echo json_encode(['success' => true, 'slots' => $slots, 'panel' => $panel]);

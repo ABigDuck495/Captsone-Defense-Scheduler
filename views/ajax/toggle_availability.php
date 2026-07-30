@@ -1,6 +1,5 @@
 <?php
 
-use ProfessorAvailability;
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/ProfessorAvailability.php';
 header('Content-Type: application/json');

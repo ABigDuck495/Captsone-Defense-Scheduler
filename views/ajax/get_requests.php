@@ -1,6 +1,5 @@
 <?php
 
-use ScheduleApproval;
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/ScheduleApproval.php';
 header('Content-Type: application/json');

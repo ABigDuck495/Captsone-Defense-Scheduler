@@ -1,8 +1,5 @@
-
 <?php
 
-use GroupMember;
-use ThesisGroup;
  
 require_once __DIR__ . '/../../db/bootstrap.php';
 header('Content-Type: application/json');
@@ -33,4 +30,3 @@ $groupId = $groupModel->create([
 $_SESSION['group_id'] = $groupId;
  
 echo json_encode(['success' => true, 'group_id' => $groupId]);
- 

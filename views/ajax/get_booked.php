@@ -1,6 +1,5 @@
 <?php
 
-use DefenseSchedule;
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/DefenseSchedule.php';
 header('Content-Type: application/json');

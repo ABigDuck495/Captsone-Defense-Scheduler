@@ -96,7 +96,7 @@ if (!defined('TSS_BOOTSTRAP_LOADED')) {
     require_once __DIR__ . '/database.php';
     // require_once __DIR__ . '/../public/assets/css/custom.css';
 
-    $database = new \Database();
+    $database = new Database();
     $pdo = $database->getConnection();
     $db = $pdo;
     $conn = $pdo;

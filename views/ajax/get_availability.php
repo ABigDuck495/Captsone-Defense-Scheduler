@@ -1,17 +1,36 @@
 <?php
 
-use ProfessorAvailability;
 require_once __DIR__ . '/../../db/bootstrap.php';
 require_once __DIR__ . '/../../Classes/ProfessorAvailability.php';
 header('Content-Type: application/json');
 
-if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'professor') {
+if (empty($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+    exit;
+}
+
+$role = $_SESSION['role'] ?? '';
+$requestedProfessorId = isset($_GET['professor_id']) ? (int) $_GET['professor_id'] : null;
+
+if ($role === 'professor') {
+    // Professors default to viewing their own calendar.
+    $professorId = $requestedProfessorId ?: $_SESSION['user_id'];
+} elseif ($role === 'student') {
+    // Students may only preview a specific professor's availability — there's
+    // no "own" calendar to default to.
+    if (!$requestedProfessorId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing professor_id']);
+        exit;
+    }
+    $professorId = $requestedProfessorId;
+} else {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$professorId = (int)($_GET['professor_id'] ?? $_SESSION['user_id']);
 $year = (int)($_GET['year'] ?? date('Y'));
 $month = (int)($_GET['month'] ?? date('m'));
 

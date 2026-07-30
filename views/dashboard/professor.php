@@ -53,15 +53,39 @@ $professorName = $professor['full_name'] ?? 'Professor';
 
     <div class="tab-pane" id="tab-availability">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 mb-0">Availability for <?= $monthName ?></h2>
+            <h2 class="h5 mb-0">Availability for <span id="availability-month-label"><?= $monthName ?></span></h2>
             <div>
                 <button class="btn btn-sm btn-outline-secondary" id="prev-month">&lt;</button>
                 <button class="btn btn-sm btn-outline-secondary" id="next-month">&gt;</button>
                 <button class="btn btn-sm btn-outline-secondary" id="today-month">Today</button>
             </div>
         </div>
-        <div id="calendar-container"></div>
-        <p class="text-body-secondary small mt-2">Click a cell to toggle. If adding, you'll be asked to repeat weekly.</p>
+        <div class="avail-cal-head">
+            <div class="avail-cal-dow">Su</div><div class="avail-cal-dow">Mo</div><div class="avail-cal-dow">Tu</div>
+            <div class="avail-cal-dow">We</div><div class="avail-cal-dow">Th</div><div class="avail-cal-dow">Fr</div>
+            <div class="avail-cal-dow">Sa</div>
+        </div>
+        <div id="calendar-container"><div class="dash-empty">Loading...</div></div>
+        <div class="cal-legend mt-2">
+            <span><span class="slot-dot open"></span>Open slot</span>
+            <span><span class="slot-dot booked"></span>Booked defense</span>
+        </div>
+        <div id="day-detail-container"></div>
+        <p class="text-body-secondary small mt-2">Click a day to view and toggle its hourly slots. Check "repeat weekly" before adding if you want it to recur.</p>
+        <style>
+            .avail-cal-head, .avail-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+            .avail-cal-head { margin-bottom: 6px; }
+            .avail-cal-dow { text-align: center; font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); }
+            .cal-cell:not(.cal-empty) {
+                cursor: pointer;
+                transition: box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+            }
+            .cal-cell:not(.cal-empty):hover {
+                border-color: var(--forest-mid);
+                box-shadow: 0 2px 10px rgba(31,61,43,.10);
+                background-color: var(--forest-pale);
+            }
+        </style>
     </div>
 
     <div class="tab-pane d-none" id="tab-requests">
@@ -72,7 +96,7 @@ $professorName = $professor['full_name'] ?? 'Professor';
 </main>
 
 <footer class="tt-footer" id="site-footer"></footer>
-<script src="<?= $__tssBaseUrl ?>public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= $__tssBaseUrl ?>public/assets/vendor/jquery/jquery.min.js"></script>
 <script src="<?= $__tssBaseUrl ?>public/assets/js/app.js"></script>
 <script>
 $(function() {
@@ -87,59 +111,141 @@ $(function() {
         if (target === '#tab-requests') loadRequests();
     });
 
+    // Availability calendar - copied from student.php's calendar rendering,
+    // adapted so a click toggles the professor's own availability instead
+    // of requesting a defense slot.
+    // Availability calendar - a month grid like the student dashboard's mini
+    // calendar, instead of one giant hour-by-day table. Clicking a day opens
+    // a day-detail panel below with that day's hourly slots to toggle.
+    let availMonthData = {};   // 'YYYY-MM-DD HH:MM:SS' -> 'available'
+    let bookedDatesSet = new Set();
+    let selectedDay = null;
+
+    // Format a Date using its LOCAL year/month/day, not UTC (Date#toISOString
+    // converts to UTC first, which silently shifts the date back a day for
+    // any timezone ahead of UTC, e.g. UTC+8).
+    function toLocalDateStr(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function hourSlots() {
+        const hours = [];
+        for (let h = 7; h <= 17; h++) hours.push(String(h).padStart(2, '0') + ':00:00');
+        return hours;
+    }
+
+    function slotsForDate(dateStr) {
+        return hourSlots().map(time => ({
+            time,
+            available: availMonthData[dateStr + ' ' + time] === 'available'
+        }));
+    }
+
     function loadCalendar() {
         $.ajax({
             url: baseUrl + 'views/ajax/get_availability.php',
             data: { professor_id: professorId, year: currentYear, month: currentMonth },
             dataType: 'json',
             success: function(res) {
-                if (res.success) renderCalendar(res.slots);
+                if (res.success) { availMonthData = res.slots; renderCalendar(); }
                 else $('#calendar-container').html('<p class="text-danger">Error loading availability.</p>');
+            },
+            error: function(xhr) {
+                console.error('get_availability.php failed:', xhr.status, xhr.responseText);
+                $('#calendar-container').html('<p class="text-danger">Error loading availability. (HTTP ' + xhr.status + ')</p>');
             }
         });
     }
 
-    function renderCalendar(slotsData) {
-        const start = new window.Date(currentYear, currentMonth-1, 1);
-        const end = new window.Date(currentYear, currentMonth, 0);
-        const days = [];
-        for (let d = new window.Date(start); d <= end; d.setDate(d.getDate()+1)) days.push(new window.Date(d));
-        const timeSlots = [];
-        for (let h=7; h<=17; h++) timeSlots.push(String(h).padStart(2,'0')+':00:00');
+    function renderCalendar() {
+        const first = new window.Date(currentYear, currentMonth - 1, 1);
+        const startWeekday = first.getDay();
+        const daysInMonth = new window.Date(currentYear, currentMonth, 0).getDate();
+        const todayStr = toLocalDateStr(new window.Date());
 
-        let html = '<table class="calendar-table table table-bordered"><thead><tr><th>Time</th>';
-        days.forEach(day => html += '<th>' + day.toLocaleDateString('en-US',{weekday:'short',day:'numeric'}) + '</th>');
-        html += '</tr></thead><tbody>';
-        timeSlots.forEach(time => {
-            html += '<tr><td class="time-label">' + time.substr(0,5) + '</td>';
-            days.forEach(day => {
-                const dateStr = day.toISOString().slice(0,10);
-                const key = dateStr + ' ' + time;
-                const cls = slotsData[key] ? 'available' : 'unavailable';
-                html += `<td class="slot ${cls}" data-date="${dateStr}" data-time="${time}"></td>`;
-            });
-            html += '</tr>';
-        });
-        html += '</tbody></table>';
+        let html = '<div class="avail-cal-grid">';
+        for (let i = 0; i < startWeekday; i++) {
+            html += '<div class="cal-cell cal-empty"></div>';
+        }
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = currentYear + '-' + String(currentMonth).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+            const openCount = slotsForDate(dateStr).filter(s => s.available).length;
+            const isBooked = bookedDatesSet.has(dateStr);
+
+            let cls = 'cal-cell';
+            if (openCount > 0 || isBooked) cls += ' has-slots';
+            if (dateStr === todayStr) cls += ' is-today';
+            if (dateStr === selectedDay) cls += ' is-selected';
+
+            let dots = '';
+            if (openCount > 0) dots += `<span class="slot-dot open" title="${openCount} open slot(s)"></span>`;
+            if (isBooked) dots += '<span class="slot-dot booked" title="Booked defense"></span>';
+
+            html += `<div class="${cls}" data-date="${dateStr}">
+                        <div class="cal-daynum">${day}</div>
+                        <div class="cal-dots">${dots}</div>
+                     </div>`;
+        }
+        const trailing = (7 - ((startWeekday + daysInMonth) % 7)) % 7;
+        for (let i = 0; i < trailing; i++) {
+            html += '<div class="cal-cell cal-empty"></div>';
+        }
+        html += '</div>';
         $('#calendar-container').html(html);
 
-        // Click handler
-        $('#calendar-container .slot').on('click', function() {
-            const $this = $(this);
-            const date = $this.data('date');
-            const time = $this.data('time');
-            const isAvailable = $this.hasClass('available');
+        $('#calendar-container .cal-cell[data-date]').on('click', function() {
+            selectedDay = $(this).data('date');
+            renderCalendar();
+            renderDayDetail(selectedDay);
+        });
+
+        if (selectedDay) renderDayDetail(selectedDay);
+    }
+
+    function renderDayDetail(dateStr) {
+        const slots = slotsForDate(dateStr);
+        const label = new window.Date(dateStr + 'T00:00:00')
+            .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+        let rows = '';
+        slots.forEach(s => {
+            rows += `<div class="slot-row">
+                        <span>${s.time.substr(0,5)}</span>
+                        <span>
+                            <span class="badge ${s.available ? 'status-approved' : 'status-rejected'}">${s.available ? 'Available' : 'Unavailable'}</span>
+                            <button class="btn btn-sm ${s.available ? 'btn-outline-danger' : 'btn-outline-success'} toggle-slot" data-time="${s.time}">
+                                ${s.available ? 'Remove' : 'Add'}
+                            </button>
+                        </span>
+                     </div>`;
+        });
+        $('#day-detail-container').html(`
+            <div class="day-detail">
+                <div class="day-detail-title">${label}</div>
+                <label class="d-flex align-items-center gap-2 mb-2" style="font-size:.85rem; cursor:pointer;">
+                    <input type="checkbox" id="repeat-weekly-check">
+                    <span>When adding, also repeat this time slot weekly for the rest of the month</span>
+                </label>
+                ${rows}
+            </div>
+        `);
+
+        $('.toggle-slot').on('click', function() {
+            const time = $(this).data('time');
+            const isAvailable = availMonthData[dateStr + ' ' + time] === 'available';
             const action = isAvailable ? 'remove' : 'add';
-            let repeat = false;
-            if (!isAvailable) {
-                repeat = confirm('Repeat this slot every week for the rest of the month?');
-            }
+            // Only ever weekly if the professor explicitly checked the box.
+            // Adding defaults to this single date only.
+            const repeat = !isAvailable && $('#repeat-weekly-check').is(':checked');
             $.ajax({
                 url: baseUrl + 'views/ajax/toggle_availability.php',
                 method: 'POST',
                 data: JSON.stringify({
                     professor_id: professorId,
-                    date: date,
+                    date: dateStr,
                     time: time,
                     action: action,
                     repeat: repeat ? 'weekly' : false
@@ -154,20 +260,37 @@ $(function() {
         });
     }
 
+    function updateMonthLabel() {
+        const date = new window.Date(currentYear, currentMonth-1, 1);
+        $('#availability-month-label').text(date.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
+    }
+
+    function clearSelectedDay() {
+        selectedDay = null;
+        $('#day-detail-container').empty();
+    }
+
     $('#prev-month').click(function() {
         if (currentMonth === 1) { currentMonth = 12; currentYear--; } else currentMonth--;
+        clearSelectedDay();
+        updateMonthLabel();
         loadCalendar();
     });
     $('#next-month').click(function() {
         if (currentMonth === 12) { currentMonth = 1; currentYear++; } else currentMonth++;
+        clearSelectedDay();
+        updateMonthLabel();
         loadCalendar();
     });
     $('#today-month').click(function() {
         const today = new window.Date();
         currentYear = today.getFullYear();
         currentMonth = today.getMonth()+1;
+        clearSelectedDay();
+        updateMonthLabel();
         loadCalendar();
     });
+    loadCalendar();
 
     function loadBooked() {
         $.ajax({
@@ -176,6 +299,11 @@ $(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.success && res.booked.length) {
+                    bookedDatesSet = new Set(
+                        res.booked
+                            .filter(b => b.status !== 'cancelled' && b.status !== 'rescheduled')
+                            .map(b => b.defense_date)
+                    );
                     let html = '<ul class="list-unstyled">';
                     res.booked.forEach(item => {
                         html += `<li><strong>${item.defense_date}</strong> ${item.start_time} - ${item.end_time} at ${item.venue || 'TBD'}</li>`;
@@ -183,8 +311,10 @@ $(function() {
                     html += '</ul>';
                     $('#booked-list').html(html);
                 } else {
+                    bookedDatesSet = new Set();
                     $('#booked-list').html('<div class="dash-empty">No booked defenses yet.</div>');
                 }
+                renderCalendar();
             }
         });
     }
@@ -239,7 +369,6 @@ $(function() {
     }
 
     loadBooked();
-    loadCalendar();
 });
 </script>
 <?php require __DIR__ . '/../layout/footer.php'; ?>

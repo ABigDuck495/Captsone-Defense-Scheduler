@@ -1,10 +1,7 @@
-
 <?php
 
-use PDO;
 
 require_once __DIR__ . '/../db/database.php';
-use Database;
 
 class Model
     {
@@ -70,4 +67,3 @@ class Model
         return $stmt->execute(['id' => $id]);
     }
 }
- 
