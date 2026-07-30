@@ -9,8 +9,6 @@ class GroupPanel extends Model
     {
         return $this->where('group_id', $groupId);
     }
-
-    /** Panel members with their names, ordered adviser, chair, critic. */
     public function panelWithNames(int $groupId): array
     {
         $sql = "
@@ -25,10 +23,6 @@ class GroupPanel extends Model
         return $stmt->fetchAll();
     }
 
-    /**
-     * Replace a group's panel with exactly one adviser, one chair,
-     * and one critic.
-     */
     public function replacePanel(int $groupId, int $adviserId, int $chairId, int $criticId): void
     {
         $stmt = $this->db->prepare('DELETE FROM group_panel WHERE group_id = :group_id');

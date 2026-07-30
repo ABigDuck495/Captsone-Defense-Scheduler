@@ -20,7 +20,7 @@ class Database {
     }
 
     public function __destruct() {
-        $this->conn = null; // closes PDO connection
+        $this->conn = null;
     }
 
     public function select($table, $columns, $where = null) {

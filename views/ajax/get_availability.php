@@ -14,11 +14,8 @@ $role = $_SESSION['role'] ?? '';
 $requestedProfessorId = isset($_GET['professor_id']) ? (int) $_GET['professor_id'] : null;
 
 if ($role === 'professor') {
-    // Professors default to viewing their own calendar.
     $professorId = $requestedProfessorId ?: $_SESSION['user_id'];
 } elseif ($role === 'student') {
-    // Students may only preview a specific professor's availability — there's
-    // no "own" calendar to default to.
     if (!$requestedProfessorId) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Missing professor_id']);

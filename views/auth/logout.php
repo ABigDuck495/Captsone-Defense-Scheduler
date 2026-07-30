@@ -1,7 +1,5 @@
 <?php
-// Ensure session is started
 if (session_status() === PHP_SESSION_NONE) {
-    // Set save path if needed (but bootstrap already did)
     session_save_path(__DIR__ . '/../../storage/sessions');
     session_start();
 }
@@ -17,9 +15,7 @@ if (ini_get('session.use_cookies')) {
 }
 session_destroy();
 
-// Redirect to login using TSS_BASE_URL (must be defined)
 if (!defined('TSS_BASE_URL')) {
-    // Fallback: compute base URL
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
     $segments = array_values(array_filter(explode('/', trim($path, '/')), 'strlen'));
     $base = '/';

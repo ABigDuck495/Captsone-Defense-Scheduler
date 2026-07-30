@@ -7,9 +7,6 @@ class ProfessorAvailability extends Model
     protected string $table = 'professor_availability';
     protected string $primaryKey = 'availability_id';
 
-    /**
-     * Add a single availability slot. Optionally repeat weekly for the rest of the month.
-     */
     public function addSlot(int $professorId, string $date, string $startTime, bool $weekly = false): void
     {
         $dates = [$date];
@@ -28,9 +25,6 @@ class ProfessorAvailability extends Model
         }
     }
 
-    /**
-     * Remove a single availability slot.
-     */
     public function removeSlot(int $professorId, string $date, string $startTime): void
     {
         $sql = "DELETE FROM professor_availability 
@@ -39,9 +33,6 @@ class ProfessorAvailability extends Model
         $stmt->execute([$professorId, $date, $startTime]);
     }
 
-    /**
-     * Fetch all slots for a professor in a given month.
-     */
     public function getForMonth(int $professorId, int $year, int $month): array
     {
         $start = "$year-$month-01";
@@ -58,9 +49,6 @@ class ProfessorAvailability extends Model
         return $result;
     }
 
-    /**
-     * Find overlapping slots for a group's panel in a given month.
-     */
     public function findOverlapsForGroupInMonth(int $groupId, int $year, int $month): array
     {
         $start = "$year-$month-01";

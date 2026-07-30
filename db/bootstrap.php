@@ -32,7 +32,6 @@ if (!defined('TSS_BOOTSTRAP_LOADED')) {
     }
     define('TSS_BASE_URL', $__tssBaseUrl);
 
-    // Determine current page
     $currentScript = basename($_SERVER['PHP_SELF'] ?? '');
     $currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
     $isAjax = ($currentDir === 'ajax') || !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
@@ -44,21 +43,16 @@ if (!defined('TSS_BOOTSTRAP_LOADED')) {
     $loggedIn = !empty($_SESSION['user_id']);
     $role = $_SESSION['role'] ?? '';
 
-    // Debug: log current state
     error_log("bootstrap: loggedIn=$loggedIn, role=$role, script=$currentScript, dir=$currentDir");
 
-    // Redirect logic
     if (!$loggedIn) {
-        // Not logged in
         if (!$isLogin && !$isIndex && !$isAjax) {
             error_log("bootstrap: redirecting to login (not logged in)");
             header('Location: ' . TSS_BASE_URL . 'views/auth/login.php');
             exit;
         }
     } else {
-        // Logged in
         if ($isLogin || $isIndex) {
-            // Redirect to dashboard
             $target = ($role === 'professor') ? 'professor.php' : 'student.php';
             error_log("bootstrap: redirecting from public to $target");
             header('Location: ' . TSS_BASE_URL . 'views/dashboard/' . $target);
@@ -74,7 +68,6 @@ if (!defined('TSS_BOOTSTRAP_LOADED')) {
             header('Location: ' . TSS_BASE_URL . 'views/dashboard/professor.php');
             exit;
         }
-        // For any other non-AJAX page that is not allowed, redirect to dashboard
         if (!$isAjax && !$isProfessor && !$isStudent) {
             $target = ($role === 'professor') ? 'professor.php' : 'student.php';
             error_log("bootstrap: redirecting unknown page to dashboard/$target");

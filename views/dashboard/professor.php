@@ -16,7 +16,7 @@ $stmt = $pdo->prepare("SELECT full_name FROM users WHERE user_id = ?");
 $stmt->execute([$professorId]);
 $professor = $stmt->fetch();
 $professorName = $professor['full_name'] ?? 'Professor';
-// ... rest of professor.php (HTML + JS) unchanged
+
 ?>
 <link rel="stylesheet" href="../../public/assets/css/custom.css">
 <script>
@@ -111,19 +111,10 @@ $(function() {
         if (target === '#tab-requests') loadRequests();
     });
 
-    // Availability calendar - copied from student.php's calendar rendering,
-    // adapted so a click toggles the professor's own availability instead
-    // of requesting a defense slot.
-    // Availability calendar - a month grid like the student dashboard's mini
-    // calendar, instead of one giant hour-by-day table. Clicking a day opens
-    // a day-detail panel below with that day's hourly slots to toggle.
-    let availMonthData = {};   // 'YYYY-MM-DD HH:MM:SS' -> 'available'
+    let availMonthData = {};   
     let bookedDatesSet = new Set();
     let selectedDay = null;
 
-    // Format a Date using its LOCAL year/month/day, not UTC (Date#toISOString
-    // converts to UTC first, which silently shifts the date back a day for
-    // any timezone ahead of UTC, e.g. UTC+8).
     function toLocalDateStr(d) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -237,8 +228,6 @@ $(function() {
             const time = $(this).data('time');
             const isAvailable = availMonthData[dateStr + ' ' + time] === 'available';
             const action = isAvailable ? 'remove' : 'add';
-            // Only ever weekly if the professor explicitly checked the box.
-            // Adding defaults to this single date only.
             const repeat = !isAvailable && $('#repeat-weekly-check').is(':checked');
             $.ajax({
                 url: baseUrl + 'views/ajax/toggle_availability.php',

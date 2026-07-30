@@ -10,8 +10,7 @@ class GroupMember extends Model
     {
         return $this->where('group_id', $groupId);
     }
- 
-    /** A student can only be in one group, so this returns a single row or null. */
+
     public function groupOfStudent(int $studentId): ?array
     {
         $rows = $this->where('student_id', $studentId);

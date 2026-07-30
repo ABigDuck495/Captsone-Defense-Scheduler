@@ -8,7 +8,6 @@ if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'student') {
 
 $studentId = $_SESSION['user_id'];
 
-// Check if student already has a group (from session or database)
 $groupId = $_SESSION['group_id'] ?? null;
 
 if (!$groupId) {
@@ -120,12 +119,33 @@ $studentName = $student['full_name'] ?? 'Student';
     </ul>
 
     <div class="tab-pane" id="tab-book">
+        1:53 PM
+<div class="tab-pane" id="tab-book">
         <div class="card p-3 p-md-4 mb-4">
             <span class="eyebrow">Step 1</span>
-            <h2 class="h5 mb-2">Select exactly 3 advisers</h2>
-            <div class="prof-picker" id="prof-picker"></div>
-            <div class="prof-counter" id="prof-counter">0 / 3 selected</div>
-            <button class="btn btn-primary btn-sm mt-2" id="assign-panel-btn">Set Panel</button>
+            <h2 class="h5 mb-2">Select your panel</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="select-adviser">Adviser</label>
+                    <select class="form-select" id="select-adviser">
+                        <option value="">Choose adviser...</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="select-chair">Chair</label>
+                    <select class="form-select" id="select-chair">
+                        <option value="">Choose chair...</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="select-critic">Critic</label>
+                    <select class="form-select" id="select-critic">
+                        <option value="">Choose critic...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="prof-counter mt-2" id="panel-status">0 / 3 selected</div>
+            <button class="btn btn-primary btn-sm mt-2" id="assign-panel-btn" disabled>Set Panel</button>
         </div>
 
         <div class="card p-3 p-md-4">
@@ -189,8 +209,36 @@ $(function() {
         if (target === '#tab-requests') loadRequests();
     });
 
-    // Load professors
-    let profNameMap = {}; // professor_id -> full_name, used by the preview calendar
+    let profNameMap = {}; 
+    const panelSelectionStorageKey = 'student_panel_selection';
+
+    function savePanelSelection() {
+        const values = ['#select-adviser', '#select-chair', '#select-critic']
+            .map(selectId => $(selectId).val());
+        try {
+            window.localStorage.setItem(panelSelectionStorageKey, JSON.stringify(values));
+        } catch (e) {
+            console.warn('Unable to save panel selection', e);
+        }
+    }
+
+    function restorePanelSelection() {
+        try {
+            const stored = window.localStorage.getItem(panelSelectionStorageKey);
+            if (!stored) return false;
+            const values = JSON.parse(stored);
+            if (!Array.isArray(values)) return false;
+
+            ['#select-adviser', '#select-chair', '#select-critic'].forEach((selectId, index) => {
+                const value = values[index];
+                $(selectId).val(value !== undefined && value !== null && value !== '' ? value : '');
+            });
+            return true;
+        } catch (e) {
+            console.warn('Unable to restore panel selection', e);
+            return false;
+        }
+    }
 
     function loadProfessors() {
         $.ajax({
@@ -198,40 +246,54 @@ $(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.success) {
-                    let html = '';
-                    res.professors.forEach(prof => {
+                    const professors = res.professors || [];
+                    professors.forEach(prof => {
                         profNameMap[prof.user_id] = prof.full_name;
-                        html += `<div class="prof-option"><input type="checkbox" class="prof-checkbox" value="${prof.user_id}" id="prof_${prof.user_id}"><label for="prof_${prof.user_id}">${prof.full_name}</label></div>`;
                     });
-                    $('#prof-picker').html(html);
-                    $('#assign-panel-btn').prop('disabled', true); // markup no longer hardcodes this
-                    $('.prof-checkbox').on('change', function() {
-                        const id = parseInt($(this).val());
-                        if ($(this).is(':checked')) {
-                            if (selectedProfessors.length >= 3) {
-                                alert('You can select at most 3 professors.');
-                                $(this).prop('checked', false);
-                                return;
-                            }
-                            selectedProfessors.push(id);
-                        } else {
-                            selectedProfessors = selectedProfessors.filter(p => p !== id);
-                        }
-                        $('#prof-counter').text(selectedProfessors.length + ' / 3 selected');
+
+                    function populateSelect(selectId, placeholder) {
+                        const $select = $(selectId);
+                        $select.empty();
+                        $select.append(`<option value="">${placeholder}</option>`);
+                        professors.forEach(prof => {
+                            $select.append(`<option value="${prof.user_id}">${prof.full_name}</option>`);
+                        });
+                    }
+
+                    populateSelect('#select-adviser', 'Choose adviser...');
+                    populateSelect('#select-chair', 'Choose chair...');
+                    populateSelect('#select-critic', 'Choose critic...');
+
+                    const restored = restorePanelSelection();
+
+                    function syncPanelSelection() {
+                        selectedProfessors = ['#select-adviser', '#select-chair', '#select-critic']
+                            .map(selectId => $(selectId).val())
+                            .filter(value => value !== '' && value !== null)
+                            .map(value => parseInt(value, 10));
+
+                        $('#panel-status').text(selectedProfessors.length + ' / 3 selected');
                         $('#assign-panel-btn').prop('disabled', selectedProfessors.length !== 3).text('Set Panel');
-                        // If a panel was already set and the selection changes afterward,
-                        // drop back to preview mode — Set Panel must be re-clicked to
-                        // commit the new trio before a request can be submitted.
+
                         if (panelAssigned) {
                             panelAssigned = false;
                             selectedBookDay = null;
                             $('#day-detail-container').empty();
                         }
-                        // Refresh both calendars immediately so open-slot dots
-                        // update live as the student checks/unchecks professors.
+
+                        savePanelSelection();
                         loadCalendar();
                         loadMiniCalendar();
-                    });
+                    }
+
+                    $('#select-adviser, #select-chair, #select-critic')
+                        .off('change.panelSelection')
+                        .on('change.panelSelection', syncPanelSelection);
+
+                    if (!restored) {
+                        savePanelSelection();
+                    }
+                    syncPanelSelection();
                 }
             }
         });
@@ -271,13 +333,10 @@ $(function() {
         if (selectedProfessors.length === 3 && !panelAssigned) assignPanel();
     });
 
-    let overlapMonthData = {};   // 'YYYY-MM-DD HH:MM:SS' -> 'available'
-    let panelNames = [];          // [{professor_id, role, full_name}]
+    let overlapMonthData = {};  
+    let panelNames = [];        
     let selectedBookDay = null;
 
-    // Format a Date using its LOCAL year/month/day, not UTC (Date#toISOString
-    // converts to UTC first, which silently shifts the date back a day for
-    // any timezone ahead of UTC, e.g. UTC+8).
     function toLocalDateStr(d) {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -300,8 +359,6 @@ $(function() {
 
     function loadCalendar() {
         if (panelAssigned) {
-            // Panel is committed — use the authoritative server-side overlap,
-            // tied to the actual group_panel rows.
             $.ajax({
                 url: baseUrl + 'views/ajax/get_overlaps.php',
                 data: { group_id: groupId, year: currentYear, month: currentMonth },
@@ -536,7 +593,6 @@ $(function() {
         });
     }
 
-    // --- Mini calendar (top "Calendar" card) ---
     let miniCalYear, miniCalMonth;
 
     function initMiniCal() {
@@ -554,9 +610,6 @@ $(function() {
         function settle() {
             pending--;
             if (pending === 0) {
-                // Priority: booked > pending > open. Applied here, after all
-                // three sources have finished loading, rather than by write
-                // order during the (concurrent, unordered) ajax callbacks.
                 const dateStatus = {};
                 openDates.forEach(d => { dateStatus[d] = { type: 'open', label: 'Open slot' }; });
                 Object.keys(pendingByDate).forEach(d => { dateStatus[d] = pendingByDate[d]; });
@@ -586,7 +639,6 @@ $(function() {
             .done(function(res) {
                 if (res && res.success) {
                     (res.booked || []).forEach(b => {
-                        // Skip defenses that were cancelled or superseded by a reschedule.
                         if (b.status === 'cancelled' || b.status === 'rescheduled') return;
                         bookedByDate[b.defense_date] = { type: 'booked', label: b.start_time + '–' + b.end_time + (b.venue ? ' @ ' + b.venue : '') };
                     });
@@ -599,9 +651,6 @@ $(function() {
             })
             .always(settle);
 
-        // Days with at least one hour open for the professors currently
-        // checked in Step 1 (falls back to an empty set — no dots — if
-        // nothing's checked yet).
         fetchAvailabilityIntersection(selectedProfessors, miniCalYear, miniCalMonth)
             .done(function(slots) {
                 Object.keys(slots).forEach(key => openDates.add(key.split(' ')[0]));

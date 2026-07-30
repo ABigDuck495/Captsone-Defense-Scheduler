@@ -10,7 +10,6 @@ class DefenseSchedule extends Model
         return $this->where('group_id', $groupId);
     }
 
-    /** A professor's booked defenses - found via their panel membership. */
     public function forProfessor(int $professorId): array
     {
         $sql = "

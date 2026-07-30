@@ -6,7 +6,7 @@
 <header id="site-header" class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-5">
   <div class="container-fluid">
     <span class="navbar-brand mb-0 h1">Thesis Scheduling System</span>
-    <a class="btn btn-primary" href="<?= $__tssBaseUrl ?>auth/login.php">Log in</a>
+    <a class="btn btn-primary" href="<?= $__tssBaseUrl ?>views/auth/login.php">Log in</a>
   </div>
 </header>
 

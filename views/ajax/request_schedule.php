@@ -23,7 +23,6 @@ $requestId = $requestModel->create([
     'status'       => 'pending',
 ]);
 
-// One pending approval row per panel member (adviser, chair, every critic)
 $approvalModel = new ScheduleApproval();
 foreach ((new GroupPanel())->panelOfGroup($groupId) as $panelMember) {
     $approvalModel->create([

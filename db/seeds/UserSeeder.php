@@ -8,7 +8,7 @@ class UserSeeder extends AbstractSeed
     {
         $this->execute('SET FOREIGN_KEY_CHECKS=0');
         $users = $this->table('users');
-        $users->truncate(); // optional: clear existing data
+        $users->truncate();
 
         $passwordHash = password_hash('Pass123', PASSWORD_BCRYPT);
 

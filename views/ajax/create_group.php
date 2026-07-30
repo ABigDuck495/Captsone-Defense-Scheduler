@@ -19,8 +19,7 @@ $groupId = $groupModel->create([
     'status'       => 'forming',
     'created_by'   => $leaderId,
 ]);
- 
-// Leader is automatically a member of their own group
+
 (new GroupMember())->create([
     'group_id'   => $groupId,
     'student_id' => $leaderId,
